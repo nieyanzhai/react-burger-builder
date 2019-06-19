@@ -1,4 +1,7 @@
 import React, { Component } from "react";
+import { withRouter } from "react-router-dom";
+import queryString from "query-string";
+
 import Auxiliary from "../../hoc/Auxiliary/Axiliary";
 import Burger from "../../components/Burger/Burger";
 import BuilderControls from "../../components/Burger/BuilderControls/BuilderControls";
@@ -15,7 +18,7 @@ const INGREDIENT_PRICE = {
   bacon: 0.7
 };
 
-class burgerBuilder extends Component {
+class BurgerBuilder extends Component {
   state = {
     ingredients: null,
     totalPrice: 4,
@@ -75,37 +78,43 @@ class burgerBuilder extends Component {
     this.setState({ purchasing: false });
   };
   purchaseContinueHandler = () => {
-    this.setState({ loading: true });
+    // this.setState({ loading: true });
 
-    const order = {
-      ingredients: this.state.ingredients,
-      price: this.state.totalPrice,
-      user: {
-        name: "nie yanzhai",
-        location: {
-          state: "jiangsu",
-          street: "wuxi kaifayuan 618-1602"
-        },
-        phone: "17626011602",
-        email: "text@text.com"
-      }
-    };
+    // const order = {
+    //   ingredients: this.state.ingredients,
+    //   price: this.state.totalPrice,
+    //   user: {
+    //     name: "nie yanzhai",
+    //     location: {
+    //       state: "jiangsu",
+    //       street: "wuxi kaifayuan 618-1602"
+    //     },
+    //     phone: "17626011602",
+    //     email: "text@text.com"
+    //   }
+    // };
 
-    axios
-      .post("/orders.json", order)
-      .then(resp => {
-        this.setState({
-          loading: false,
-          purchasing: false
-        });
-      })
-      .catch(err => {
-        this.setState({
-          loading: false,
-          purchasing: false
-        });
-      })
-      .finally(null);
+    // axios
+    //   .post("/orders.json", order)
+    //   .then(resp => {
+    //     this.setState({
+    //       loading: false,
+    //       purchasing: false
+    //     });
+    //   })
+    //   .catch(_err => {
+    //     this.setState({
+    //       loading: false,
+    //       purchasing: false
+    //     });
+    //   })
+    //   .finally(null);
+    const searchString = "?" + queryString.stringify(this.state.ingredients);
+
+    this.props.history.push({
+      pathname: "/checkout",
+      search: searchString
+    });
   };
 
   render() {
@@ -165,4 +174,4 @@ class burgerBuilder extends Component {
   }
 }
 
-export default withErrorHandler(burgerBuilder, axios);
+export default withErrorHandler(withRouter(BurgerBuilder), axios);

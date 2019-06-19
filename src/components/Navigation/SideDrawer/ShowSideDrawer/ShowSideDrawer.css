@@ -1,0 +1,24 @@
+.ShowSideDrawer {
+  margin: 0;
+  padding: 0;
+  width: 2rem;
+  height: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+.ShowSideDrawer:hover {
+  cursor: pointer;
+}
+.ShowSideDrawer div {
+  width: 100%;
+  height: 0.15rem;
+  background: white;
+}
+
+@media (min-width: 600px) {
+  .ShowSideDrawer {
+    display: none;
+  }
+}

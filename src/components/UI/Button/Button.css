@@ -1,0 +1,24 @@
+.Button {
+  padding: 0.2rem 0.6rem;
+  margin: 0.4rem;
+  font-size: 1rem;
+  color: white;
+  border: none;
+  border-radius: 0.2rem;
+  transition: all 0.3s;
+}
+.Button:hover {
+  cursor: pointer;
+}
+.Success {
+  background-color: rgb(0, 128, 11);
+}
+.Success:hover {
+  background-color: rgb(13, 226, 31);
+}
+.Danger {
+  background-color: rgb(197, 61, 37);
+}
+.Danger:hover {
+  background-color: rgb(255, 19, 90);
+}

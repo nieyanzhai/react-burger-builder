@@ -1,0 +1,46 @@
+.BuilderControl {
+  width: 80%;
+  margin: 0.5rem 0;
+  font: inherit;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.BuilderControl label {
+  font-weight: bold;
+  font-size: 1rem;
+}
+.BuilderControl button {
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin: 0 1rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.2rem;
+  color: white;
+  transition: all 0.2s;
+}
+.BuilderControl button:hover {
+  cursor: pointer;
+  transform: scale(1.1);
+}
+.BuilderControl button.Less {
+  background: #eda435;
+  border: 1px solid gray;
+}
+.BuilderControl button.Less:disabled {
+  background-color: gray;
+}
+.BuilderControl button.Less:disabled:hover {
+  cursor: not-allowed;
+  transform: none;
+}
+.BuilderControl button.More {
+  background: #774002;
+  border: 1px solid #774002;
+}
+
+@media (min-width: 600px) {
+  .BuilderControl {
+    width: 450px;
+  }
+}

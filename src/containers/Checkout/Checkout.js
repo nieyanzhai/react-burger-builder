@@ -1,26 +1,31 @@
 import React, { Component } from "react";
+import { Route } from "react-router-dom";
 import queryString from "query-string";
 
 import CheckoutSummary from "../../components/Order/CheckoutSummary/CheckoutSummay";
+import ContactData from "./ContactData/ContactData";
 
 class Checkout extends Component {
   state = {
-    ingredients: {
-      meat: 1,
-      salad: 1,
-      bacon: 1,
-      cheese: 1
-    }
+    ingredients: null,
+    totalPrice: 0
   };
 
-  componentDidMount() {
-    const ingredients = queryString.parse(this.props.location.search);
+  componentWillMount() {
+    let totalPrice = 0;
+    const ingredients = {};
 
-    for (let key in ingredients) {
-      ingredients[key] = +ingredients[key];
+    const searchStringObj = queryString.parse(this.props.location.search);
+
+    for (let key in searchStringObj) {
+      if (key === "totalPrice") {
+        totalPrice = (+searchStringObj[key]).toFixed(2);
+      } else {
+        ingredients[key] = +searchStringObj[key];
+      }
     }
 
-    this.setState({ ingredients: ingredients });
+    this.setState({ ingredients: ingredients, totalPrice: totalPrice });
   }
 
   orderCanceled = () => {
@@ -28,16 +33,28 @@ class Checkout extends Component {
   };
 
   orderContinued = () => {
-    this.props.history.push("/checkout/validation");
+    this.props.history.push("/checkout/contact-data");
   };
 
   render() {
     return (
-      <CheckoutSummary
-        ingredients={this.state.ingredients}
-        orderCanceled={this.orderCanceled}
-        orderContinued={this.orderContinued}
-      />
+      <div>
+        <CheckoutSummary
+          ingredients={this.state.ingredients}
+          orderCanceled={this.orderCanceled}
+          orderContinued={this.orderContinued}
+        />
+        <Route
+          path={this.props.match.url + "/contact-data"}
+          render={() => (
+            <ContactData
+              ingredients={this.state.ingredients}
+              totalPrice={this.state.totalPrice}
+              {...this.props}
+            />
+          )}
+        />
+      </div>
     );
   }
 }

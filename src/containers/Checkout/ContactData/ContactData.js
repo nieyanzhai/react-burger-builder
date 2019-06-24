@@ -17,7 +17,12 @@ class ContactData extends Component {
           placeholder: "Your Name"
         },
         value: "",
-        label: "Name"
+        label: "Name",
+        validation: {
+          required: true
+        },
+        valid: false,
+        touched: false
       },
       street: {
         elementType: "input",
@@ -27,7 +32,12 @@ class ContactData extends Component {
           placeholder: "Street"
         },
         value: "",
-        label: "Street"
+        label: "Street",
+        validation: {
+          required: true
+        },
+        valid: false,
+        touched: false
       },
       zipCode: {
         elementType: "input",
@@ -37,7 +47,14 @@ class ContactData extends Component {
           placeholder: "Zip Code"
         },
         value: "",
-        label: "Zip Code"
+        label: "Zip Code",
+        validation: {
+          required: true,
+          minLength: 5,
+          maxLength: 5
+        },
+        valid: false,
+        touched: false
       },
       country: {
         elementType: "input",
@@ -47,7 +64,12 @@ class ContactData extends Component {
           placeholder: "Your Country"
         },
         value: "",
-        label: "Country"
+        label: "Country",
+        validation: {
+          required: true
+        },
+        valid: false,
+        touched: false
       },
       email: {
         elementType: "input",
@@ -57,7 +79,12 @@ class ContactData extends Component {
           placeholder: "Your E-Mail"
         },
         value: "",
-        label: "Email"
+        label: "Email",
+        validation: {
+          required: true
+        },
+        valid: false,
+        touched: false
       },
       delivery: {
         elementType: "select",
@@ -74,10 +101,13 @@ class ContactData extends Component {
           ]
         },
         value: "fastest",
-        label: "Delivery"
+        label: "Delivery",
+        validation: {},
+        valid: true
       }
     },
-    loading: false
+    loading: false,
+    formIsValid: false
   };
 
   orderSubmitHandler = event => {
@@ -92,7 +122,7 @@ class ContactData extends Component {
 
     const order = {
       ingredients: this.props.ingredients,
-      price: this.props.totalPrice,
+      price: this.props.totalPrice.toFixed(2),
       contact: orderFormData
     };
 
@@ -113,14 +143,45 @@ class ContactData extends Component {
       });
   };
 
+  checkValidity = (value, rules) => {
+    let isValid = true;
+
+    if (rules.required) {
+      isValid = value.trim() !== "" && isValid;
+    }
+
+    if (rules.minLength) {
+      isValid = value.length >= rules.minLength && isValid;
+    }
+
+    if (rules.maxLength) {
+      isValid = value.length <= rules.maxLength && isValid;
+    }
+
+    return isValid;
+  };
+
   inputChangeHandler = (event, elementID) => {
     const updatedFormElements = { ...this.state.formElements };
     const updatedFormElement = { ...updatedFormElements[elementID] };
 
     updatedFormElement.value = event.target.value;
+    updatedFormElement.valid = this.checkValidity(
+      updatedFormElement.value,
+      updatedFormElement.validation
+    );
+    updatedFormElement.touched = true;
     updatedFormElements[elementID] = updatedFormElement;
 
-    this.setState({ formElements: updatedFormElements });
+    let formIsValid = true;
+    for (let element in updatedFormElements) {
+      formIsValid = updatedFormElements[element].valid && formIsValid;
+    }
+
+    this.setState({
+      formElements: updatedFormElements,
+      formIsValid: formIsValid
+    });
   };
 
   render() {
@@ -134,7 +195,12 @@ class ContactData extends Component {
 
     let form = (
       <form className={classes.Form} onSubmit={this.orderSubmitHandler}>
-        <label style={{ textAlign: "center", margin: "1.5rem auto" }}>
+        <label
+          style={{
+            textAlign: "center",
+            margin: "1.5rem auto"
+          }}
+        >
           Enter your contact data
         </label>
         {formElementArr.map(element => (
@@ -144,10 +210,15 @@ class ContactData extends Component {
             elementConfig={element.config.elementConfig}
             elementValue={element.config.value}
             label={element.config.label}
+            invalid={!element.config.valid}
+            shouldCheck={element.config.validation}
+            touched={element.config.touched}
             changed={event => this.inputChangeHandler(event, element.id)}
           />
         ))}
-        <Button btnType="Success">Continue</Button>
+        <Button btnType="Success" disabled={!this.state.formIsValid}>
+          Continue
+        </Button>
       </form>
     );
     if (this.state.loading) {

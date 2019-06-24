@@ -1,31 +1,14 @@
 import React, { Component } from "react";
 import { Route } from "react-router-dom";
-import queryString from "query-string";
+// import queryString from "query-string";
+import { connect } from "react-redux";
 
 import CheckoutSummary from "../../components/Order/CheckoutSummary/CheckoutSummay";
 import ContactData from "./ContactData/ContactData";
 
 class Checkout extends Component {
-  state = {
-    ingredients: null,
-    totalPrice: 0
-  };
-
-  componentWillMount() {
-    let totalPrice = 0;
-    const ingredients = {};
-
-    const searchStringObj = queryString.parse(this.props.location.search);
-
-    for (let key in searchStringObj) {
-      if (key === "totalPrice") {
-        totalPrice = (+searchStringObj[key]).toFixed(2);
-      } else {
-        ingredients[key] = +searchStringObj[key];
-      }
-    }
-
-    this.setState({ ingredients: ingredients, totalPrice: totalPrice });
+  componentDidMount() {
+    console.log(this.props);
   }
 
   orderCanceled = () => {
@@ -40,7 +23,7 @@ class Checkout extends Component {
     return (
       <div>
         <CheckoutSummary
-          ingredients={this.state.ingredients}
+          ingredients={this.props.ingredients}
           orderCanceled={this.orderCanceled}
           orderContinued={this.orderContinued}
         />
@@ -48,8 +31,8 @@ class Checkout extends Component {
           path={this.props.match.url + "/contact-data"}
           render={() => (
             <ContactData
-              ingredients={this.state.ingredients}
-              totalPrice={this.state.totalPrice}
+              ingredients={this.props.ingredients}
+              totalPrice={this.props.totalPrice}
               {...this.props}
             />
           )}
@@ -59,4 +42,11 @@ class Checkout extends Component {
   }
 }
 
-export default Checkout;
+const mapStateToProps = state => {
+  return {
+    ingredients: state.ingredients,
+    totalPrice: state.totalPrice
+  };
+};
+
+export default connect(mapStateToProps)(Checkout);

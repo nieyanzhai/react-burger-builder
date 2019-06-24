@@ -19,3 +19,14 @@
   background-color: #bbb;
   box-shadow: 0 2px 3px #eee;
 }
+
+.Invalid {
+  border: 1px solid red;
+  background: salmon;
+}
+
+.ValidationError {
+  font-size: 0.7rem;
+  color: red;
+  margin: 0.4rem 0;
+}

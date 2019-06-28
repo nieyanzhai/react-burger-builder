@@ -1,10 +1,14 @@
 import React, { Component } from "react";
-import axios from "../../../axios";
+import { connect } from "react-redux";
 
+import classes from "./ContactData.css";
 import Button from "../../../components/UI/Button/Button";
 import Spinner from "../../../components/UI/Spinner/Spinner";
 import Input from "../../../components/UI/Input/Input";
-import classes from "./ContactData.css";
+import axios from "../../../axios";
+import * as actions from "../../../store/actions/index";
+import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
+import { updateObject, checkValidity } from "../../../shared/utility";
 
 class ContactData extends Component {
   state = {
@@ -106,14 +110,11 @@ class ContactData extends Component {
         valid: true
       }
     },
-    loading: false,
     formIsValid: false
   };
 
-  orderSubmitHandler = event => {
+  onSubmitHandler = event => {
     event.preventDefault();
-
-    this.setState({ loading: true });
 
     const orderFormData = {};
     for (let formElement in this.state.formElements) {
@@ -123,55 +124,24 @@ class ContactData extends Component {
     const order = {
       ingredients: this.props.ingredients,
       price: this.props.totalPrice.toFixed(2),
-      contact: orderFormData
+      contact: orderFormData,
+      userId: this.props.userId
     };
 
-    axios
-      .post("/orders.json", order)
-      .then(resp => {
-        this.setState({
-          loading: false
-        });
-      })
-      .catch(err => {
-        this.setState({
-          loading: false
-        });
-      })
-      .finally(() => {
-        this.props.history.push("/");
-      });
-  };
-
-  checkValidity = (value, rules) => {
-    let isValid = true;
-
-    if (rules.required) {
-      isValid = value.trim() !== "" && isValid;
-    }
-
-    if (rules.minLength) {
-      isValid = value.length >= rules.minLength && isValid;
-    }
-
-    if (rules.maxLength) {
-      isValid = value.length <= rules.maxLength && isValid;
-    }
-
-    return isValid;
+    this.props.onCheckout(order, this.props.token);
   };
 
   inputChangeHandler = (event, elementID) => {
-    const updatedFormElements = { ...this.state.formElements };
-    const updatedFormElement = { ...updatedFormElements[elementID] };
-
-    updatedFormElement.value = event.target.value;
-    updatedFormElement.valid = this.checkValidity(
-      updatedFormElement.value,
-      updatedFormElement.validation
-    );
-    updatedFormElement.touched = true;
-    updatedFormElements[elementID] = updatedFormElement;
+    const updatedFormElements = updateObject(this.state.formElements, {
+      [elementID]: updateObject(this.state.formElements[elementID], {
+        value: event.target.value,
+        valid: checkValidity(
+          event.target.value,
+          this.state.formElements[elementID].validation
+        ),
+        touched: true
+      })
+    });
 
     let formIsValid = true;
     for (let element in updatedFormElements) {
@@ -194,7 +164,7 @@ class ContactData extends Component {
     }
 
     let form = (
-      <form className={classes.Form} onSubmit={this.orderSubmitHandler}>
+      <form className={classes.Form} onSubmit={this.onSubmitHandler}>
         <label
           style={{
             textAlign: "center",
@@ -221,7 +191,7 @@ class ContactData extends Component {
         </Button>
       </form>
     );
-    if (this.state.loading) {
+    if (this.props.checkouting) {
       form = <Spinner />;
     }
 
@@ -229,4 +199,26 @@ class ContactData extends Component {
   }
 }
 
-export default ContactData;
+const mapStateToProps = state => {
+  return {
+    ingredients: state.burgerBuilder.ingredients,
+    totalPrice: state.burgerBuilder.totalPrice,
+    checkouting: state.order.checkouting,
+    token: state.auth.token,
+    userId: state.auth.userID
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    onCheckout: (order, token) => dispatch(actions.checkoutAsync(order, token))
+  };
+};
+
+export default withErrorHandler(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )(ContactData),
+  axios
+);

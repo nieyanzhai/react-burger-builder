@@ -11,21 +11,16 @@ import OrderSummary from "../../components/Burger/OrderSummary/OrderSummary";
 import Spinner from "../../components/UI/Spinner/Spinner";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 import axios from "../../axios";
-import * as actionType from "../../store/actions";
+import * as actions from "../../store/actions/index";
 
 class BurgerBuilder extends Component {
   state = {
-    purchasing: false,
-    loading: false,
-    error: false
+    purchasing: false
   };
 
   componentDidMount() {
-    console.log(this.props);
-    // axios
-    //   .get("/ingredients.json")
-    //   .then(resp => this.setState({ ingredients: resp.data }))
-    //   .catch(err => this.setState({ error: true }));
+    this.props.onInitIngredients();
+    this.props.onCheckoutInit();
   }
 
   updatePurchasable = newIngredients => {
@@ -38,12 +33,18 @@ class BurgerBuilder extends Component {
   };
 
   purchaseHandler = () => {
-    this.setState({ purchasing: true });
+    if (this.props.isAuth) {
+      this.setState({ purchasing: true });
+    } else {
+      this.props.onSetAuthRedirectPath("/checkout");
+      this.props.history.push("/auth");
+    }
   };
 
   purchaseCancelHandler = () => {
     this.setState({ purchasing: false });
   };
+
   purchaseContinueHandler = () => {
     this.props.history.push("/checkout");
   };
@@ -56,7 +57,7 @@ class BurgerBuilder extends Component {
     }
 
     let orderSummary = null;
-    let burger = this.state.error ? (
+    let burger = this.props.error ? (
       <p style={{ textAlign: "center", color: "red" }}>
         Error: loading ingredients failed!!!!
       </p>
@@ -82,13 +83,10 @@ class BurgerBuilder extends Component {
             price={this.props.totalPrice}
             purchasable={this.updatePurchasable(this.props.ingredients)}
             purchasing={this.purchaseHandler}
+            isAuth={this.props.isAuth}
           />
         </Auxiliary>
       );
-    }
-
-    if (this.state.loading) {
-      orderSummary = <Spinner />;
     }
 
     return (
@@ -107,17 +105,20 @@ class BurgerBuilder extends Component {
 
 const mapStateToProps = state => {
   return {
-    ingredients: state.ingredients,
-    totalPrice: state.totalPrice
+    ingredients: state.burgerBuilder.ingredients,
+    totalPrice: state.burgerBuilder.totalPrice,
+    error: state.burgerBuilder.error,
+    isAuth: state.auth.token !== null
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    onIngredientAdded: type =>
-      dispatch({ type: actionType.ADD_INGREDIENTS, ingredientType: type }),
-    onIngredientRemoved: type =>
-      dispatch({ type: actionType.REMOVE_INGREDIENTS, ingredientType: type })
+    onIngredientAdded: type => dispatch(actions.addIngredient(type)),
+    onIngredientRemoved: type => dispatch(actions.removeIngredient(type)),
+    onInitIngredients: () => dispatch(actions.initIngredients()),
+    onCheckoutInit: () => dispatch(actions.checkoutInit()),
+    onSetAuthRedirectPath: path => dispatch(actions.setAuthRedirectPath(path))
   };
 };
 

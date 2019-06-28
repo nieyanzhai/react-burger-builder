@@ -1,6 +1,6 @@
 .BuilderControls {
   width: 100%;
-  padding: 1rem;
+  padding: 0.5rem;
   background: #ec9106;
   display: flex;
   flex-direction: column;
@@ -42,4 +42,7 @@
   100% {
     transform: scale(1);
   }
+}
+
+@media (min-width: 600px) {
 }
